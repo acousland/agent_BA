@@ -1,0 +1,71 @@
+{
+  "appTitle": "Guided Chat",
+  "greeting": "Hello! I'll help you gather and document requirements for your project. Let's work through this systematically.",
+  "topics": [
+    {
+      "id": "t1",
+      "title": "Project Overview",
+      "systemPrompt": "Gather high-level project information including objectives, stakeholders, and context.",
+      "userIntro": "Let's start with the big picture. What project are we gathering requirements for?",
+      "fields": [
+        { "key": "projectName", "label": "Project name", "required": true },
+        { "key": "projectObjective", "label": "Primary objective", "required": true },
+        { "key": "stakeholders", "label": "Key stakeholders", "required": true },
+        { "key": "businessContext", "label": "Business context or background", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t2",
+      "title": "User Requirements",
+      "systemPrompt": "Focus on who will use the system and what they need to accomplish. Dig into user stories and use cases.",
+      "userIntro": "Now let's talk about the users. Who will use this and what do they need to do?",
+      "fields": [
+        { "key": "userTypes", "label": "Types of users or personas", "required": true },
+        { "key": "userGoals", "label": "What users need to accomplish", "required": true },
+        { "key": "userStories", "label": "Key user stories or scenarios", "required": true }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t3",
+      "title": "Functional Requirements",
+      "systemPrompt": "Document specific functionality and features the system must provide. Be concrete and specific.",
+      "userIntro": "Let's get specific about functionality. What must the system be able to do?",
+      "fields": [
+        { "key": "coreFeatures", "label": "Core features required", "required": true },
+        { "key": "dataRequirements", "label": "Data that needs to be captured/stored", "required": true },
+        { "key": "integrations", "label": "Required integrations or connections", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t4",
+      "title": "Non-Functional Requirements",
+      "systemPrompt": "Gather requirements around performance, security, scalability, and other quality attributes.",
+      "userIntro": "Now let's cover quality and performance requirements. What constraints or standards apply?",
+      "fields": [
+        { "key": "performanceReqs", "label": "Performance requirements", "required": true },
+        { "key": "securityReqs", "label": "Security and compliance needs", "required": true },
+        { "key": "scalabilityReqs", "label": "Scalability or volume expectations", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t5",
+      "title": "Constraints & Assumptions",
+      "systemPrompt": "Document any constraints, dependencies, or assumptions that will affect the project.",
+      "userIntro": "Finally, let's capture constraints and assumptions. What limitations or dependencies should we know about?",
+      "fields": [
+        { "key": "technicalConstraints", "label": "Technical constraints", "required": true },
+        { "key": "budgetTimeline", "label": "Budget and timeline constraints", "required": true },
+        { "key": "assumptions", "label": "Key assumptions being made", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    }
+  ],
+  "docx": {
+    "title": "Requirements Specification",
+    "fileName": "requirements-specification.docx"
+  }
+}

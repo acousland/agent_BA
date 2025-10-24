@@ -7,7 +7,7 @@ import {
 } from './graph/stateManager.js';
 import { processMessage, initializeSession } from './graph/topicGraph.js';
 import { generateDocx } from './docx.js';
-import { loadConfig } from './config/loader.js';
+import { loadConfig, listConfigs, setCurrentConfig, getCurrentConfigName } from './config/loader.js';
 
 const router = Router();
 
@@ -129,6 +129,47 @@ router.get('/config', (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error in /api/config:', error);
     res.status(500).json({ error: 'Failed to load configuration' });
+  }
+});
+
+// GET /api/configs/list - List all available configs
+router.get('/configs/list', (req: Request, res: Response) => {
+  try {
+    const configs = listConfigs();
+    const currentConfig = getCurrentConfigName();
+    res.json({ configs, currentConfig });
+  } catch (error) {
+    console.error('Error in /api/configs/list:', error);
+    res.status(500).json({ error: 'Failed to list configurations' });
+  }
+});
+
+// POST /api/configs/switch - Switch to a different config
+router.post('/configs/switch', (req: Request, res: Response) => {
+  try {
+    const { configName } = req.body;
+
+    if (!configName) {
+      return res.status(400).json({ error: 'configName is required' });
+    }
+
+    // Verify config exists
+    const availableConfigs = listConfigs();
+    if (!availableConfigs.includes(configName)) {
+      return res.status(404).json({ error: 'Configuration not found' });
+    }
+
+    setCurrentConfig(configName);
+    const config = loadConfig(configName);
+
+    res.json({
+      success: true,
+      currentConfig: configName,
+      config
+    });
+  } catch (error) {
+    console.error('Error in /api/configs/switch:', error);
+    res.status(500).json({ error: 'Failed to switch configuration' });
   }
 });
 

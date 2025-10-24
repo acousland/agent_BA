@@ -86,7 +86,18 @@ npm run typecheck   # Check TypeScript types without building
 
 ## Configuration
 
-Topics are defined in `app.config.json` with this structure:
+### Multiple Conversation Types
+
+The application supports multiple conversation configurations stored in the `configs/` directory. Users can switch between different conversation types using a dropdown at the top of the UI.
+
+Default configurations:
+- `configs/professional-profile.json` - Professional background intake
+- `configs/customer-feedback.json` - Product feedback collection
+- `configs/medical-intake.json` - Medical intake form
+
+### Configuration Structure
+
+Each config file in `configs/` has this structure:
 - `id`: Unique topic identifier
 - `title`: Display name in sidebar
 - `systemPrompt`: Instructions for LLM when handling this topic

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChatWindow } from './ChatWindow';
 import { TopicSidebar } from './TopicSidebar';
+import { ConfigSelector } from './ConfigSelector';
 import type { TopicState, AppConfig, Message } from './types';
 import './styles/glass.css';
 
@@ -11,14 +12,29 @@ function App() {
   const [state, setState] = useState<TopicState | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [availableConfigs, setAvailableConfigs] = useState<string[]>([]);
+  const [currentConfig, setCurrentConfig] = useState<string>('');
 
-  // Load config on mount
+  // Load available configs on mount
   useEffect(() => {
+    fetch(`${API_URL}/api/configs/list`)
+      .then(res => res.json())
+      .then(data => {
+        setAvailableConfigs(data.configs);
+        setCurrentConfig(data.currentConfig);
+      })
+      .catch(err => console.error('Failed to load configs:', err));
+  }, []);
+
+  // Load current config
+  useEffect(() => {
+    if (!currentConfig) return;
+
     fetch(`${API_URL}/api/config`)
       .then(res => res.json())
       .then(data => setConfig(data))
       .catch(err => console.error('Failed to load config:', err));
-  }, []);
+  }, [currentConfig]);
 
   // Initialize session on mount
   useEffect(() => {
@@ -122,28 +138,60 @@ function App() {
     }
   };
 
-  if (!config) {
+  const handleConfigChange = async (configName: string) => {
+    try {
+      // Switch config on backend
+      const response = await fetch(`${API_URL}/api/configs/switch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ configName })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCurrentConfig(configName);
+        setConfig(data.config);
+        // Reset session state
+        setState(null);
+        setMessages([]);
+        // Will trigger re-initialization via useEffect
+      }
+    } catch (err) {
+      console.error('Failed to switch config:', err);
+    }
+  };
+
+  if (!config || availableConfigs.length === 0) {
     return <div style={{ color: 'white', padding: '20px' }}>Loading...</div>;
   }
 
   return (
     <div className="app-container">
-      <div className="chat-section">
-        <ChatWindow
-          title={config.appTitle}
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          isLoading={isLoading}
-        />
-      </div>
+      <ConfigSelector
+        configs={availableConfigs}
+        currentConfig={currentConfig}
+        onConfigChange={handleConfigChange}
+      />
 
-      <div className="sidebar-section">
-        <TopicSidebar
-          config={config}
-          state={state}
-          onNavigate={handleNavigate}
-          onDownload={handleDownload}
-        />
+      <div className="main-content">
+        <div className="chat-section">
+          <ChatWindow
+            title={config.appTitle}
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
+        </div>
+
+        <div className="sidebar-section">
+          <TopicSidebar
+            config={config}
+            state={state}
+            onNavigate={handleNavigate}
+            onDownload={handleDownload}
+          />
+        </div>
       </div>
     </div>
   );

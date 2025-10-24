@@ -1,0 +1,70 @@
+{
+  "appTitle": "Guided Chat",
+  "greeting": "Hi! I'll help you document your enhancement request. Let's capture all the important details.",
+  "topics": [
+    {
+      "id": "t1",
+      "title": "Enhancement Overview",
+      "systemPrompt": "Understand what enhancement is being requested and which system it applies to.",
+      "userIntro": "Let's start with the basics. What enhancement are you requesting?",
+      "fields": [
+        { "key": "enhancementTitle", "label": "Enhancement title", "required": true },
+        { "key": "systemArea", "label": "System or area affected", "required": true },
+        { "key": "requestedBy", "label": "Requested by (name/team)", "required": true }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t2",
+      "title": "Current State & Problem",
+      "systemPrompt": "Understand the current situation and what problem or limitation exists today.",
+      "userIntro": "Tell me about the current state. What's the problem or limitation you're experiencing?",
+      "fields": [
+        { "key": "currentBehavior", "label": "How it works currently", "required": true },
+        { "key": "problemStatement", "label": "What's the problem or pain point", "required": true },
+        { "key": "impactedUsers", "label": "Who is affected by this", "required": true }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t3",
+      "title": "Proposed Solution",
+      "systemPrompt": "Capture the proposed enhancement and desired future state. Be specific about what should change.",
+      "userIntro": "What's your proposed solution? How should it work instead?",
+      "fields": [
+        { "key": "proposedSolution", "label": "Proposed enhancement", "required": true },
+        { "key": "desiredOutcome", "label": "Desired outcome or behavior", "required": true },
+        { "key": "alternativeApproaches", "label": "Alternative approaches considered", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t4",
+      "title": "Business Value & Priority",
+      "systemPrompt": "Understand the business impact, benefits, and urgency of this enhancement.",
+      "userIntro": "Let's talk about the value. Why is this enhancement important?",
+      "fields": [
+        { "key": "businessValue", "label": "Business value or benefit", "required": true },
+        { "key": "urgency", "label": "Urgency level (Low/Medium/High/Critical)", "required": true },
+        { "key": "successMetrics", "label": "How to measure success", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t5",
+      "title": "Additional Context",
+      "systemPrompt": "Gather any additional context, dependencies, or constraints that should be considered.",
+      "userIntro": "Finally, is there any other context we should capture?",
+      "fields": [
+        { "key": "dependencies", "label": "Dependencies or prerequisites", "required": false },
+        { "key": "technicalConsiderations", "label": "Technical considerations", "required": false },
+        { "key": "additionalNotes", "label": "Additional notes or context", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    }
+  ],
+  "docx": {
+    "title": "Enhancement Request",
+    "fileName": "enhancement-request.docx"
+  }
+}

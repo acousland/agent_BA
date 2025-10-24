@@ -5,14 +5,30 @@ export interface Message {
   text: string;
 }
 
+export interface Field {
+  key: string;
+  label: string;
+  required: boolean;
+  type?: 'text' | 'multiselect';
+  options?: string[];
+}
+
+export interface ConditionalRule {
+  field: string;
+  operator: 'contains' | 'equals' | 'not_empty';
+  value?: string | string[];
+}
+
 export interface TopicConfig {
   id: string;
   title: string;
+  fields?: Field[];
+  showIf?: ConditionalRule;
 }
 
 export interface TopicData {
   transcript: Message[];
-  fields: Record<string, string>;
+  fields: Record<string, string | string[]>;
   status: TopicStatus;
 }
 

@@ -1,0 +1,147 @@
+{
+  "appTitle": "Guided Chat",
+  "greeting": "Welcome! I'm here to help you develop your initial idea into something concrete. Let's explore your concept together.",
+  "topics": [
+    {
+      "id": "t1",
+      "title": "Core Concept",
+      "systemPrompt": "Help the user articulate their core idea. Ask clarifying questions to understand the essence of what they want to create or achieve.",
+      "userIntro": "Let's start with the basics. What's your idea? Tell me about the problem you're trying to solve or the opportunity you see.",
+      "fields": [
+        { "key": "ideaName", "label": "Idea name or working title", "required": true },
+        { "key": "problemStatement", "label": "Problem being solved", "required": true },
+        { "key": "targetAudience", "label": "Who is this for?", "required": true }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t2",
+      "title": "Strategic Alignment",
+      "systemPrompt": "Present the strategic goals as a checklist. The user should select which goals this idea aligns with. Accept their selections directly without asking follow-up questions.",
+      "userIntro": "Which of the following strategic goals does your idea align with? Please select all that apply:",
+      "fields": [
+        {
+          "key": "strategicGoals",
+          "label": "Strategic Goals",
+          "required": true,
+          "type": "multiselect",
+          "options": [
+            "Improve Customer Experience",
+            "Increase Operational Efficiency",
+            "Drive Innovation",
+            "Enhance Sustainability"
+          ]
+        }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t2a",
+      "title": "Customer Experience Impact",
+      "systemPrompt": "Deep dive into how this idea will improve customer experience. Be specific about touchpoints, pain points addressed, and expected outcomes.",
+      "userIntro": "Since this aligns with improving customer experience, let's explore the specific impact on customers.",
+      "fields": [
+        { "key": "customerTouchpoints", "label": "Key customer touchpoints affected", "required": true },
+        { "key": "painPointsAddressed", "label": "Customer pain points this addresses", "required": true },
+        { "key": "expectedCXOutcome", "label": "Expected customer experience improvements", "required": true }
+      ],
+      "completionRule": "all_required_fields_present",
+      "showIf": {
+        "field": "strategicGoals",
+        "operator": "contains",
+        "value": "Improve Customer Experience"
+      }
+    },
+    {
+      "id": "t2b",
+      "title": "Operational Efficiency Gains",
+      "systemPrompt": "Explore the operational efficiency benefits. Focus on processes improved, time/cost savings, and measurable efficiency gains.",
+      "userIntro": "Let's discuss the operational efficiency improvements this idea will bring.",
+      "fields": [
+        { "key": "processesImproved", "label": "Processes that will be improved", "required": true },
+        { "key": "efficiencyMetrics", "label": "How efficiency will be measured", "required": true },
+        { "key": "expectedSavings", "label": "Expected time or cost savings", "required": true }
+      ],
+      "completionRule": "all_required_fields_present",
+      "showIf": {
+        "field": "strategicGoals",
+        "operator": "contains",
+        "value": "Increase Operational Efficiency"
+      }
+    },
+    {
+      "id": "t2c",
+      "title": "Innovation Elements",
+      "systemPrompt": "Identify the innovative aspects of this idea. What's new, what technologies or approaches are being used, and how it differs from existing solutions.",
+      "userIntro": "Tell me about the innovative aspects of your idea.",
+      "fields": [
+        { "key": "innovativeElements", "label": "What makes this innovative", "required": true },
+        { "key": "technologiesUsed", "label": "New technologies or approaches", "required": true },
+        { "key": "marketDifferentiation", "label": "How this differs from existing solutions", "required": true }
+      ],
+      "completionRule": "all_required_fields_present",
+      "showIf": {
+        "field": "strategicGoals",
+        "operator": "contains",
+        "value": "Drive Innovation"
+      }
+    },
+    {
+      "id": "t2d",
+      "title": "Sustainability Impact",
+      "systemPrompt": "Explore the sustainability benefits. Focus on environmental impact, resource efficiency, and long-term sustainability outcomes.",
+      "userIntro": "Let's explore the sustainability aspects of your idea.",
+      "fields": [
+        { "key": "environmentalImpact", "label": "Environmental impact or benefits", "required": true },
+        { "key": "resourceEfficiency", "label": "How resources will be used more efficiently", "required": true },
+        { "key": "sustainabilityMetrics", "label": "Sustainability metrics or targets", "required": true }
+      ],
+      "completionRule": "all_required_fields_present",
+      "showIf": {
+        "field": "strategicGoals",
+        "operator": "contains",
+        "value": "Enhance Sustainability"
+      }
+    },
+    {
+      "id": "t3a",
+      "title": "Value Proposition",
+      "systemPrompt": "Explore what makes this idea unique and valuable. Help the user think through benefits, differentiators, and why people would care.",
+      "userIntro": "Now let's talk about what makes your idea special. What value does it provide?",
+      "fields": [
+        { "key": "keyBenefits", "label": "Key benefits to users", "required": true },
+        { "key": "uniqueValue", "label": "What makes it unique", "required": true },
+        { "key": "competition", "label": "Existing alternatives or competitors", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t4",
+      "title": "Vision & Scope",
+      "systemPrompt": "Help define the vision and initial scope. Keep it focused on what's essential for a first version.",
+      "userIntro": "Let's define the scope. What would success look like, and what should be included in the first version?",
+      "fields": [
+        { "key": "successMetrics", "label": "What defines success", "required": true },
+        { "key": "coreFeatures", "label": "Must-have features for V1", "required": true },
+        { "key": "constraints", "label": "Known constraints or limitations", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t5",
+      "title": "Next Steps",
+      "systemPrompt": "Help the user identify concrete next steps and resources needed to move forward.",
+      "userIntro": "Finally, let's plan next steps. What needs to happen to bring this idea to life?",
+      "fields": [
+        { "key": "nextActions", "label": "Immediate next actions", "required": true },
+        { "key": "resourcesNeeded", "label": "Resources or skills needed", "required": true },
+        { "key": "timeline", "label": "Rough timeline or milestones", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    }
+  ],
+  "docx": {
+    "title": "Initial Idea Development Summary",
+    "fileName": "idea-development.docx"
+  }
+}

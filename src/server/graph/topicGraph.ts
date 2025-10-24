@@ -4,6 +4,7 @@ import type { TopicState, Message } from '../types.js';
 import { loadConfig, getTopicById } from '../config/loader.js';
 import { llm } from '../llm.js';
 import { extractFields, checkCompletion } from './fieldExtractor.js';
+import { getNextVisibleTopic, areAllVisibleTopicsComplete } from './conditionalLogic.js';
 
 interface GraphState extends TopicState {
   userMessage?: string;
@@ -48,15 +49,28 @@ async function processTopicNode(state: GraphState): Promise<Partial<GraphState>>
     .map(m => `${m.role}: ${m.text}`)
     .join('\n');
 
+  // Build field information for the prompt
+  const fieldInfo = topicConfig.fields.map(f => {
+    if (f.type === 'multiselect' && f.options) {
+      return `${f.label} (multiselect from: ${f.options.join(', ')})`;
+    }
+    return f.label;
+  }).join(', ');
+
   // Generate AI response
   const messages = [
     new HumanMessage({
       content: `${topicConfig.systemPrompt}
 
-Conversation so far:
+${topicConfig.fields.some(f => f.type === 'multiselect' && f.options) ?
+  'IMPORTANT: For multiselect fields, you must present the EXACT options listed below. The user should select from these exact options:\n' +
+  topicConfig.fields
+    .filter(f => f.type === 'multiselect' && f.options)
+    .map(f => `- ${f.label}: ${f.options!.map(o => `"${o}"`).join(', ')}`)
+    .join('\n') + '\n\n' : ''}Conversation so far:
 ${conversationHistory}
 
-Respond naturally to continue the conversation. Guide the user to provide the information we need: ${topicConfig.fields.map(f => f.label).join(', ')}.
+Respond naturally to continue the conversation. Guide the user to provide the information we need: ${fieldInfo}.
 If you have all the required information, acknowledge it and let them know we can move on.`
     })
   ];
@@ -76,11 +90,15 @@ If you have all the required information, acknowledge it and let them know we ca
     llm
   );
 
+  console.log(`[processTopicNode] Topic ${state.activeTopicId} extracted fields:`, extractedFields);
+
   // Merge extracted fields with existing ones
   topicData.fields = { ...topicData.fields, ...extractedFields };
 
   // Check if topic is complete
   const isComplete = checkCompletion(topicData.fields, topicConfig.fields);
+  console.log(`[processTopicNode] Topic ${state.activeTopicId} is complete:`, isComplete, 'Fields:', topicData.fields);
+
   if (isComplete) {
     topicData.status = 'Complete';
   }
@@ -92,25 +110,34 @@ If you have all the required information, acknowledge it and let them know we ca
 }
 
 function shouldMoveToNextTopic(state: GraphState): string {
-  const config = loadConfig();
   const currentTopic = state.topics[state.activeTopicId];
 
+  console.log('[shouldMoveToNextTopic] Current topic:', state.activeTopicId, 'Status:', currentTopic.status);
+
   if (currentTopic.status !== 'Complete') {
+    console.log('[shouldMoveToNextTopic] Topic not complete, continuing');
     return 'continue';
   }
 
-  const currentIndex = config.topics.findIndex(t => t.id === state.activeTopicId);
-  if (currentIndex < config.topics.length - 1) {
+  // Check if there are more visible topics
+  const nextTopic = getNextVisibleTopic(state, state.activeTopicId);
+  console.log('[shouldMoveToNextTopic] Next visible topic:', nextTopic?.id || 'none');
+
+  if (nextTopic) {
     return 'next';
   }
 
-  return 'done';
+  // Check if all visible topics are complete
+  if (areAllVisibleTopicsComplete(state)) {
+    console.log('[shouldMoveToNextTopic] All visible topics complete');
+    return 'done';
+  }
+
+  return 'continue';
 }
 
 async function moveToNextTopicNode(state: GraphState): Promise<Partial<GraphState>> {
-  const config = loadConfig();
-  const currentIndex = config.topics.findIndex(t => t.id === state.activeTopicId);
-  const nextTopic = config.topics[currentIndex + 1];
+  const nextTopic = getNextVisibleTopic(state, state.activeTopicId);
 
   if (!nextTopic) {
     return { done: true };

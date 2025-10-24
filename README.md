@@ -47,13 +47,20 @@ This will start:
 
 ## Configuration
 
-Edit `app.config.json` to customize:
-- App title and greeting message
-- Topics and their prompts
-- Fields to extract for each topic
-- Document export settings
+### Multiple Conversation Types
 
-Example topic configuration:
+The application supports multiple conversation configurations! You can create different conversation flows for different use cases.
+
+**Configuration files are stored in the `configs/` directory.** The app includes three example configurations:
+- `professional-profile.json` - Collect professional background information
+- `customer-feedback.json` - Gather product feedback from customers
+- `medical-intake.json` - Medical intake form conversation
+
+To create a new conversation type, add a new JSON file to the `configs/` directory. The app will automatically detect it and add it to the dropdown selector.
+
+### Configuration Structure
+
+Each config file can customize:
 ```json
 {
   "id": "t1",

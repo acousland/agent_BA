@@ -9,6 +9,14 @@ export interface Field {
   key: string;
   label: string;
   required: boolean;
+  type?: 'text' | 'multiselect'; // Default is 'text'
+  options?: string[]; // For multiselect fields
+}
+
+export interface ConditionalRule {
+  field: string; // Field key to check
+  operator: 'contains' | 'equals' | 'not_empty'; // How to evaluate
+  value?: string | string[]; // Value to check against
 }
 
 export interface TopicConfig {
@@ -18,6 +26,7 @@ export interface TopicConfig {
   userIntro: string;
   fields: Field[];
   completionRule: string;
+  showIf?: ConditionalRule; // Optional: only show this topic if condition is met
 }
 
 export interface AppConfig {
@@ -32,7 +41,7 @@ export interface AppConfig {
 
 export interface TopicData {
   transcript: Message[];
-  fields: Record<string, string>;
+  fields: Record<string, string | string[]>; // Can be string or array for multiselect
   status: TopicStatus;
 }
 

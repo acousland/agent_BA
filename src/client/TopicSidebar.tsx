@@ -1,5 +1,6 @@
 import React from 'react';
 import type { TopicState, AppConfig } from './types';
+import { getVisibleTopics } from './conditionalLogic';
 
 interface TopicSidebarProps {
   config: AppConfig;
@@ -31,6 +32,9 @@ export function TopicSidebar({ config, state, onNavigate, onDownload }: TopicSid
     }
   };
 
+  // Filter topics based on conditional visibility
+  const visibleTopics = getVisibleTopics(config.topics, state);
+
   return (
     <aside className="topic-sidebar glass">
       <div className="sidebar-header">
@@ -38,7 +42,7 @@ export function TopicSidebar({ config, state, onNavigate, onDownload }: TopicSid
       </div>
 
       <ul className="topics-list">
-        {config.topics.map((topic) => {
+        {visibleTopics.map((topic) => {
           const topicData = state?.topics[topic.id];
           const status = topicData?.status || 'NotStarted';
           const isActive = state?.activeTopicId === topic.id;
