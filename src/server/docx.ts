@@ -65,7 +65,13 @@ export async function generateDocx(state: TopicState): Promise<Buffer> {
       );
 
       topicConfig.fields.forEach(field => {
-        const value = topicData.fields[field.key] || 'Not provided';
+        const fieldValue = topicData.fields[field.key];
+        const value: string =
+          fieldValue == null || (Array.isArray(fieldValue) && fieldValue.length === 0)
+            ? 'Not provided'
+            : Array.isArray(fieldValue)
+              ? fieldValue.join(', ')
+              : fieldValue;
         sections.push(
           new Paragraph({
             children: [

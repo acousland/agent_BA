@@ -119,6 +119,24 @@ function shouldMoveToNextTopic(state: GraphState): string {
     return 'continue';
   }
 
+  if (
+    state.revisitingTopicId === state.activeTopicId &&
+    state.resumeTopicId &&
+    state.resumeTopicId !== state.activeTopicId
+  ) {
+    console.log('[shouldMoveToNextTopic] Returning to previous topic:', state.resumeTopicId);
+    state.activeTopicId = state.resumeTopicId;
+    state.revisitingTopicId = null;
+    state.resumeTopicId = null;
+    return 'continue';
+  }
+
+  if (state.revisitingTopicId === state.activeTopicId) {
+    console.log('[shouldMoveToNextTopic] Completed revisit of topic:', state.activeTopicId);
+    state.revisitingTopicId = null;
+  }
+  state.resumeTopicId = null;
+
   // Check if there are more visible topics
   const nextTopic = getNextVisibleTopic(state, state.activeTopicId);
   console.log('[shouldMoveToNextTopic] Next visible topic:', nextTopic?.id || 'none');

@@ -7,7 +7,13 @@ import {
 } from './graph/stateManager.js';
 import { processMessage, initializeSession } from './graph/topicGraph.js';
 import { generateDocx } from './docx.js';
-import { loadConfig, listConfigs, setCurrentConfig, getCurrentConfigName } from './config/loader.js';
+import {
+  loadConfig,
+  listConfigs,
+  setCurrentConfig,
+  getCurrentConfigName,
+  getTopicById
+} from './config/loader.js';
 
 const router = Router();
 
@@ -76,18 +82,39 @@ router.post('/navigate', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid topic ID' });
     }
 
+    if (state.activeTopicId === topicId) {
+      return res.json({ state, message: 'Already on target topic' });
+    }
+
     // Only allow navigation to completed topics
     if (targetTopic.status !== 'Complete') {
       return res.status(403).json({ error: 'Cannot navigate to incomplete topic' });
     }
 
-    // Update active topic
+    const previousTopicId = state.activeTopicId;
+    state.resumeTopicId = previousTopicId !== topicId ? previousTopicId : null;
+    state.revisitingTopicId = topicId;
     state.activeTopicId = topicId;
+    state.done = false;
+
+    targetTopic.status = 'InProgress';
+    targetTopic.revisitCount = (targetTopic.revisitCount ?? 0) + 1;
+
+    const topicConfig = getTopicById(topicId);
+    const acknowledgement = topicConfig
+      ? `No worries, keen to revisit ${topicConfig.title}. What would you like to change?`
+      : 'No worries, keen to revisit this topic. What would you like to change?';
+
+    targetTopic.transcript.push({
+      role: 'assistant',
+      text: acknowledgement
+    });
+
     updateSession(sessionId, state);
 
     res.json({
       state,
-      message: `Navigated to topic: ${topicId}`
+      message: acknowledgement
     });
   } catch (error) {
     console.error('Error in /api/navigate:', error);

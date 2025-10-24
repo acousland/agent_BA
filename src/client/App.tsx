@@ -94,6 +94,7 @@ function App() {
     if (!state) return;
 
     try {
+      setIsLoading(true);
       const response = await fetch(`${API_URL}/api/navigate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,6 +112,8 @@ function App() {
       setMessages(topicMessages);
     } catch (err) {
       console.error('Failed to navigate:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -166,6 +169,13 @@ function App() {
     return <div style={{ color: 'white', padding: '20px' }}>Loading...</div>;
   }
 
+  const activeTopic = state ? config.topics.find(topic => topic.id === state.activeTopicId) : undefined;
+  const isRevisitingActiveTopic =
+    Boolean(state && state.revisitingTopicId && state.revisitingTopicId === state.activeTopicId);
+  const revisitBanner = isRevisitingActiveTopic
+    ? `Revisiting ${activeTopic?.title ?? 'this topic'} — let me know what you'd like to tweak.`
+    : undefined;
+
   return (
     <div className="app-container">
       <ConfigSelector
@@ -181,6 +191,7 @@ function App() {
             messages={messages}
             onSendMessage={handleSendMessage}
             isLoading={isLoading}
+            bannerText={revisitBanner}
           />
         </div>
 

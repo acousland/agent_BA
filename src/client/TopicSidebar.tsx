@@ -47,20 +47,36 @@ export function TopicSidebar({ config, state, onNavigate, onDownload }: TopicSid
           const status = topicData?.status || 'NotStarted';
           const isActive = state?.activeTopicId === topic.id;
           const isComplete = status === 'Complete';
-          const isClickable = isComplete && !isActive;
+          const isRevisiting = isActive && state?.revisitingTopicId === topic.id;
 
           return (
             <li
               key={topic.id}
-              className={`topic-item ${isActive ? 'active' : ''} ${isClickable ? 'clickable' : ''}`}
-              onClick={() => isClickable && onNavigate(topic.id)}
+              className={`topic-item ${isActive ? 'active' : ''}`}
             >
               <div className="topic-title">
                 {topic.title}
               </div>
-              <span className={`status-badge ${getStatusBadgeClass(status)}`}>
-                {getStatusLabel(status)}
-              </span>
+              <div className="topic-controls">
+                <span className={`status-badge ${getStatusBadgeClass(status)}`}>
+                  {getStatusLabel(status)}
+                </span>
+                {isRevisiting && (
+                  <span className="revisit-chip">Revisiting</span>
+                )}
+                {isComplete && !isActive && (
+                  <button
+                    type="button"
+                    className="return-button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onNavigate(topic.id);
+                    }}
+                  >
+                    Return
+                  </button>
+                )}
+              </div>
             </li>
           );
         })}

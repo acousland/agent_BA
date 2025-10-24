@@ -5,7 +5,9 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 export const llm = new ChatOpenAI({
-  modelName: 'gpt-4o-mini',
-  temperature: 0.7,
+  modelName: 'gpt-5-nano',
+  modelKwargs: {
+    reasoning_effort: 'minimal'
+  },
   openAIApiKey: process.env.OPENAI_API_KEY
 });

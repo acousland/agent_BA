@@ -6,9 +6,10 @@ interface ChatWindowProps {
   messages: Message[];
   onSendMessage: (message: string) => void;
   isLoading: boolean;
+  bannerText?: string;
 }
 
-export function ChatWindow({ title, messages, onSendMessage, isLoading }: ChatWindowProps) {
+export function ChatWindow({ title, messages, onSendMessage, isLoading, bannerText }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +34,11 @@ export function ChatWindow({ title, messages, onSendMessage, isLoading }: ChatWi
       <div className="chat-header">
         <h1>{title}</h1>
       </div>
+      {bannerText && (
+        <div className="revisit-banner">
+          {bannerText}
+        </div>
+      )}
 
       <div className="messages-container">
         {messages.map((msg, index) => (

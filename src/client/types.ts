@@ -30,6 +30,7 @@ export interface TopicData {
   transcript: Message[];
   fields: Record<string, string | string[]>;
   status: TopicStatus;
+  revisitCount?: number;
 }
 
 export interface TopicState {
@@ -37,6 +38,8 @@ export interface TopicState {
   activeTopicId: string;
   topics: Record<string, TopicData>;
   done: boolean;
+  revisitingTopicId: string | null;
+  resumeTopicId: string | null;
 }
 
 export interface AppConfig {

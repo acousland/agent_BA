@@ -22,7 +22,9 @@ export function createNewSession(): TopicState {
     sessionId,
     activeTopicId: config.topics[0].id,
     topics,
-    done: false
+    done: false,
+    revisitingTopicId: null,
+    resumeTopicId: null
   };
 
   sessions.set(sessionId, state);
