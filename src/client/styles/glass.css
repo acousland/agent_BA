@@ -156,6 +156,35 @@ body {
   font-weight: 600;
 }
 
+.steps-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.step-section {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.step-header h3 {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 .topics-list {
   list-style: none;
   display: flex;
@@ -247,20 +276,24 @@ body {
 }
 
 /* Scrollbar Styles */
-.messages-container::-webkit-scrollbar {
+.messages-container::-webkit-scrollbar,
+.steps-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.messages-container::-webkit-scrollbar-track {
+.messages-container::-webkit-scrollbar-track,
+.steps-list::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
 }
 
-.messages-container::-webkit-scrollbar-thumb {
+.messages-container::-webkit-scrollbar-thumb,
+.steps-list::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
-.messages-container::-webkit-scrollbar-thumb:hover {
+.messages-container::-webkit-scrollbar-thumb:hover,
+.steps-list::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }

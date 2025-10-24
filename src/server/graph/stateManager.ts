@@ -1,27 +1,39 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { TopicState, TopicData } from '../types.js';
-import { loadConfig } from '../config/loader.js';
+import type { TopicState, TopicData, StepData } from '../types.js';
+import { getAllSteps } from '../config/loader.js';
 
 // In-memory session storage (in production, use Redis or a database)
 const sessions = new Map<string, TopicState>();
 
 export function createNewSession(): TopicState {
-  const config = loadConfig();
+  const steps = getAllSteps();
   const sessionId = uuidv4();
 
-  const topics: Record<string, TopicData> = {};
-  config.topics.forEach(topic => {
-    topics[topic.id] = {
-      transcript: [],
-      fields: {},
+  const stepsData: Record<string, StepData> = {};
+  steps.forEach(step => {
+    const topics: Record<string, TopicData> = {};
+    step.topics.forEach(topic => {
+      topics[topic.fieldName] = {
+        transcript: [],
+        value: '',
+        confidence: 0,
+        needsMoreInput: true,
+        missing: [],
+        status: 'NotStarted'
+      };
+    });
+
+    stepsData[step.stepId] = {
+      topics,
       status: 'NotStarted'
     };
   });
 
   const state: TopicState = {
     sessionId,
-    activeTopicId: config.topics[0].id,
-    topics,
+    activeStepId: steps[0].stepId,
+    activeTopicId: steps[0].topics[0].fieldName,
+    steps: stepsData,
     done: false
   };
 

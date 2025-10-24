@@ -74,7 +74,7 @@ function App() {
     }
   };
 
-  const handleNavigate = async (topicId: string) => {
+  const handleNavigate = async (stepId: string, topicId: string) => {
     if (!state) return;
 
     try {
@@ -83,6 +83,7 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: state.sessionId,
+          stepId,
           topicId
         })
       });
@@ -91,7 +92,7 @@ function App() {
       setState(data.state);
 
       // Load messages for this topic
-      const topicMessages = data.state.topics[topicId].transcript;
+      const topicMessages = data.state.steps[stepId].topics[topicId].transcript;
       setMessages(topicMessages);
     } catch (err) {
       console.error('Failed to navigate:', err);
@@ -112,7 +113,7 @@ function App() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = config?.docx.fileName || 'session-summary.docx';
+      a.download = 'initiative-summary.docx';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -130,7 +131,7 @@ function App() {
     <div className="app-container">
       <div className="chat-section">
         <ChatWindow
-          title={config.appTitle}
+          title="Initiative Idea Development"
           messages={messages}
           onSendMessage={handleSendMessage}
           isLoading={isLoading}

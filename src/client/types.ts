@@ -6,29 +6,39 @@ export interface Message {
 }
 
 export interface TopicConfig {
-  id: string;
-  title: string;
+  fieldName: string;
+  displayName: string;
+  description: string;
+}
+
+export interface StepConfig {
+  stepId: string;
+  displayName: string;
+  topics: TopicConfig[];
 }
 
 export interface TopicData {
   transcript: Message[];
-  fields: Record<string, string>;
+  value: string;
+  confidence: number;
+  needsMoreInput: boolean;
+  status: TopicStatus;
+}
+
+export interface StepData {
+  topics: Record<string, TopicData>;
   status: TopicStatus;
 }
 
 export interface TopicState {
   sessionId: string;
+  activeStepId: string;
   activeTopicId: string;
-  topics: Record<string, TopicData>;
+  steps: Record<string, StepData>;
   done: boolean;
 }
 
 export interface AppConfig {
-  appTitle: string;
-  greeting: string;
-  topics: TopicConfig[];
-  docx: {
-    title: string;
-    fileName: string;
-  };
+  defaultModel: string;
+  steps: StepConfig[];
 }

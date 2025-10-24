@@ -20,7 +20,11 @@ router.post('/chat', async (req: Request, res: Response) => {
     let reply: string;
 
     // If it's a new session (no messages yet), initialize it
-    if (!sessionId || state.topics[state.activeTopicId].transcript.length === 0) {
+    const currentStepData = state.steps[state.activeStepId];
+    const currentTopicData = currentStepData?.topics[state.activeTopicId];
+    const isNewSession = !sessionId || !currentTopicData || currentTopicData.transcript.length === 0;
+
+    if (isNewSession) {
       const result = await initializeSession(state);
       state = result.state;
       reply = result.reply;
@@ -64,14 +68,19 @@ router.get('/session/:id', (req: Request, res: Response) => {
 // POST /api/navigate - Navigate to a different topic
 router.post('/navigate', async (req: Request, res: Response) => {
   try {
-    const { sessionId, topicId } = req.body as NavigateRequest;
+    const { sessionId, stepId, topicId } = req.body as NavigateRequest;
     const state = getSession(sessionId);
 
     if (!state) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const targetTopic = state.topics[topicId];
+    const targetStep = state.steps[stepId];
+    if (!targetStep) {
+      return res.status(400).json({ error: 'Invalid step ID' });
+    }
+
+    const targetTopic = targetStep.topics[topicId];
     if (!targetTopic) {
       return res.status(400).json({ error: 'Invalid topic ID' });
     }
@@ -81,7 +90,8 @@ router.post('/navigate', async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Cannot navigate to incomplete topic' });
     }
 
-    // Update active topic
+    // Update active step and topic
+    state.activeStepId = stepId;
     state.activeTopicId = topicId;
     updateSession(sessionId, state);
 
@@ -110,10 +120,9 @@ router.post('/docx', async (req: Request, res: Response) => {
     }
 
     const buffer = await generateDocx(state);
-    const config = loadConfig();
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    res.setHeader('Content-Disposition', `attachment; filename="${config.docx.fileName}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="initiative-summary.docx"`);
     res.send(buffer);
   } catch (error) {
     console.error('Error in /api/docx:', error);

@@ -5,41 +5,101 @@ export interface Message {
   text: string;
 }
 
-export interface Field {
-  key: string;
-  label: string;
-  required: boolean;
+// Agent configuration for structured output
+export interface AgentSchema {
+  type: string;
+  properties: {
+    value: {
+      type: string;
+      description: string;
+    };
+    confidence: {
+      type: string;
+      minimum: number;
+      maximum: number;
+    };
+    needsMoreInput: {
+      type: string;
+    };
+    missing?: {
+      type: string;
+      items: {
+        type: string;
+      };
+    };
+  };
+  required: string[];
+}
+
+export interface AgentConfig {
+  model: string;
+  contextWindow: number;
+  schema: AgentSchema;
+  prePrompt: string;
+  confidence: {
+    min: number;
+  };
+  retry: {
+    malformedJson: number;
+  };
+}
+
+export interface DialogueAgent {
+  question: string;
 }
 
 export interface TopicConfig {
-  id: string;
-  title: string;
-  systemPrompt: string;
-  userIntro: string;
-  fields: Field[];
-  completionRule: string;
+  fieldName: string;
+  displayName: string;
+  description: string;
+  extractionHint: string;
+  required: boolean;
+  dialogueAgent: DialogueAgent;
+  agent: AgentConfig;
+  completionCriteria: string;
+}
+
+export interface StepConfig {
+  stepId: string;
+  displayName: string;
+  model: string;
+  topics: TopicConfig[];
+}
+
+export interface AppBehaviour {
+  topicSession: {
+    retry: {
+      malformedJson: number;
+    };
+    transcriptWindow: number;
+  };
 }
 
 export interface AppConfig {
-  appTitle: string;
-  greeting: string;
-  topics: TopicConfig[];
-  docx: {
-    title: string;
-    fileName: string;
-  };
+  defaultModel: string;
+  steps: StepConfig[];
+  appBehaviour: AppBehaviour;
 }
 
 export interface TopicData {
   transcript: Message[];
-  fields: Record<string, string>;
+  value: string;
+  confidence: number;
+  needsMoreInput: boolean;
+  missing: string[];
+  status: TopicStatus;
+}
+
+export interface StepData {
+  topics: Record<string, TopicData>;
   status: TopicStatus;
 }
 
 export interface TopicState {
   sessionId: string;
+  activeStepId: string;
   activeTopicId: string;
-  topics: Record<string, TopicData>;
+  steps: Record<string, StepData>;
   done: boolean;
 }
 
@@ -56,5 +116,6 @@ export interface ChatResponse {
 
 export interface NavigateRequest {
   sessionId: string;
+  stepId: string;
   topicId: string;
 }

@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import type { AppConfig } from '../types.js';
+import type { AppConfig, StepConfig, TopicConfig } from '../types.js';
 
 let cachedConfig: AppConfig | null = null;
 
@@ -15,7 +15,18 @@ export function loadConfig(): AppConfig {
   return cachedConfig;
 }
 
-export function getTopicById(topicId: string): AppConfig['topics'][0] | undefined {
+export function getStepById(stepId: string): StepConfig | undefined {
   const config = loadConfig();
-  return config.topics.find(t => t.id === topicId);
+  return config.steps.find(s => s.stepId === stepId);
+}
+
+export function getTopicByFieldName(stepId: string, fieldName: string): TopicConfig | undefined {
+  const step = getStepById(stepId);
+  if (!step) return undefined;
+  return step.topics.find(t => t.fieldName === fieldName);
+}
+
+export function getAllSteps(): StepConfig[] {
+  const config = loadConfig();
+  return config.steps;
 }

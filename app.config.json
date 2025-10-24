@@ -1,45 +1,623 @@
 {
-  "appTitle": "Guided Topics Chat",
-  "greeting": "G'day! I'll guide you through a short set of topics to learn more about you.",
-  "topics": [
+  "defaultModel": "gpt-4o-mini",
+  "steps": [
     {
-      "id": "t1",
-      "title": "About You",
-      "systemPrompt": "Collect the user's full name, role/title, and city. Be friendly and conversational. Extract these fields from the conversation.",
-      "userIntro": "Let's start with some basics about you. What is your full name, role, and city?",
-      "fields": [
-        { "key": "fullName", "label": "Full name", "required": true },
-        { "key": "role", "label": "Role/Title", "required": true },
-        { "key": "city", "label": "City", "required": true }
-      ],
-      "completionRule": "all_required_fields_present"
+      "stepId": "problem-framing",
+      "displayName": "Co-design",
+      "model": "gpt-4o-mini",
+      "topics": [
+        {
+          "fieldName": "problemStatement",
+          "displayName": "Create Problem Statement",
+          "description": "A 'How might we...' statement",
+          "extractionHint": "Single sentence starting 'How might we…', naming the user and desired outcome; no solution.",
+          "required": false,
+          "dialogueAgent": {
+            "question": "What problem do you want to solve, or what possibility do you want to unlock?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "The final 'How might we…' sentence."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are an experienced Business Analyst using Australian English. Your job is to synthesise the transcript into a single, non-solution 'How might we…' statement, and to decide if further input is needed. Present the summary of the users answer back to them for confirmation before setting needsMoreInput=false. #### DO NOT DISCUSS SOLUTIONS, ONLY THE PROLEM STATEMENT ####.\n\nDecide the topic is complete (needsMoreInput=false) when you have a good single sentence statement that starts with 'How might we...'. Present the How might we statement back to the user in for format 'Does this summarise it for you: How might we...' for confirmation. Only when the user confirms should you set needsMoreInput=false and give the just final response without any qualifiers like e.g., Does this summarise it for you:....\n\nReturn strict JSON with fields: value (your response text), confidence (0–1), needsMoreInput (bool), missing (array). No extra text.",
+            "confidence": { "min": 0.8 },
+            "retry": { "malformedJson": 2 }
+          },
+          "completionCriteria": "Agent determines needsMoreInput=false"
+        },
+        {
+          "fieldName": "visionAndFeatures",
+          "displayName": "Define Vision and Key Features",
+          "description": "What success looks like and key capabilities",
+          "extractionHint": "One-sentence 'demo snapshot' plus three short capability phrases",
+          "required": false,
+          "dialogueAgent": {
+            "question": "Now tell me what is your vision for a solution?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "One-sentence vision of how the solution works, plus 2-3 short phrases describing key capabilities."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are an experienced Business Analyst using Australian English. Your job is to help users envision what their AI solution might look like (high level aspirational vision). Guide the conversation to understand what success looks like from a user's perspective but only ask a single followup question at a time. Present the summary of the users answer back to them for confirmation before setting needsMoreInput=false. If you aren't getting the right answer after 2-3 questions then just take a best guess and move on. Don't go down into success metrics. \n\nDecide the topic is complete (needsMoreInput=false) when the user has described what the working solution looks like from a high level user perspective and has described 2-3 core features of the app. After that, present the vision statement and 2-5 key feature dot points back to the user in for format 'Does this summarise it for you: ...' for confirmation. Only when the user confirms should you set needsMoreInput=false and give the just final response without any qualifiers like e.g., Does this summarise it for you:..... \n\nReturn strict JSON with fields: value (your response text), confidence (0–1), needsMoreInput (bool), missing (array). No extra text. Keep the vision statement to under 20 words and no more than 2-5 dot points for the key features.",
+            "confidence": { "min": 0.6 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Agent determines needsMoreInput=false with sufficient confidence that a clear vision statement"
+        }
+      ]
     },
     {
-      "id": "t2",
-      "title": "Professional Background",
-      "systemPrompt": "Learn about the user's company, years of experience, and industry. Be conversational and ask follow-up questions if needed.",
-      "userIntro": "Great! Now tell me about your professional background.",
-      "fields": [
-        { "key": "company", "label": "Company", "required": true },
-        { "key": "yearsExperience", "label": "Years of experience", "required": true },
-        { "key": "industry", "label": "Industry", "required": false }
-      ],
-      "completionRule": "all_required_fields_present"
+      "stepId": "value-realisation",
+      "displayName": "Value Realisation",
+      "model": "gpt-4o-mini",
+      "topics": [
+        {
+          "fieldName": "climateResilientWater",
+          "displayName": "Explore Climate Resilient Water Alignment",
+          "description": "How does this initiative contribute to climate-resilient water systems?",
+          "extractionHint": "Return a single, concrete statement of contribution to climate resilience (e.g., demand forecasting, drought readiness, asset resilience).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "In what way would this initiative help Water create more climate-resilient water systems (e.g., <5% restrictions or ≤3 months/5 years, +3,330 ML security, 85% drinking water satisfaction)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise contribution statement."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Climate Resilience Alignment Agent. Extract a single, concrete statement describing how the initiative supports climate-resilient water systems (e.g., supply security, drought preparedness, extreme-weather response, resilient assets). Be specific and outcome-focused.\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "User provides a clear, outcome-focused statement linking the initiative to climate resilience."
+        },
+        {
+          "fieldName": "waterSmartGrowth",
+          "displayName": "Explore Water Smart Growth Alignment",
+          "description": "How does this initiative enable smart growth while managing water constraints?",
+          "extractionHint": "Return a concise statement linking the initiative to growth that is serviced efficiently (e.g., planning, demand, infrastructure sequencing).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How would this initiative enable smart, sustainable growth (e.g., all new precincts informed by IWM plans, 5-year NWGGA IWM actions completed, Barwon SDS actions completed)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise contribution statement to water-smart growth."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Water Smart Growth Alignment Agent. Extract a single statement that shows how the initiative supports growth that is planned, serviced, and affordable (e.g., demand modelling, developer servicing strategies, sequencing of assets).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Clear statement connecting the initiative to enabling growth that can be serviced efficiently and sustainably."
+        },
+        {
+          "fieldName": "waterEfficientSystems",
+          "displayName": "Explore Water Efficient Systems Alignment",
+          "description": "How does this initiative improve water efficiency across the system?",
+          "extractionHint": "Return a single statement on efficiency gains (e.g., leakage reduction, reuse, demand optimisation).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How does this initiative improve efficiency in the way water is used or managed (e.g., $2.5M to save 1,000 ML via customer programs, 27,000 digital meters to detect/address losses)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise efficiency contribution statement."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Water Efficiency Alignment Agent. Extract a single statement showing how the initiative increases system efficiency (e.g., leakage detection, non-revenue water, reuse/recycling, demand optimisation).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Statement clearly identifies the efficiency lever and expected impact."
+        },
+        {
+          "fieldName": "positiveCustomerExperiences",
+          "displayName": "Explore Positive Customer Experiences Alignment",
+          "description": "How does this initiative improve customer experience?",
+          "extractionHint": "Return a single statement on CX outcomes (e.g., faster response, proactive notifications, simpler processes).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "What kind of positive customer experience would this initiative create (e.g., 85% rate ease 'very good–excellent,' 85% satisfaction, consistently top 4 in Victoria)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on customer experience benefits."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Customer Experience Alignment Agent. Extract a single statement showing how the initiative improves customer outcomes (e.g., reliability, responsiveness, transparency, ease-of-use).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Clear link to specific, positive customer outcomes."
+        },
+        {
+          "fieldName": "beyondCompliance",
+          "displayName": "Explore Beyond Compliance Alignment",
+          "description": "How does this initiative go beyond minimum compliance requirements?",
+          "extractionHint": "Return a single statement on exceeding standards (e.g., earlier detection, higher quality thresholds, proactive reporting).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How would this initiative go beyond minimum compliance requirements (e.g., 100% SDWA & EPA compliance, ≤2/1,000 water quality complaints, research on emerging contaminants, VDSS core maturity)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on surpassing compliance."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Compliance+ Alignment Agent. Extract a single statement showing how the initiative goes beyond minimum regulatory requirements in practice and outcomes.\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Statement demonstrates practical outcomes beyond baseline compliance."
+        },
+        {
+          "fieldName": "zeroUnplannedInterruptions",
+          "displayName": "Explore Towards Zero Unplanned Water Interruptions Alignment",
+          "description": "How does this initiative reduce unplanned water service interruptions?",
+          "extractionHint": "Return a single statement on prevention/mitigation (e.g., predictive failure, asset condition, rapid response).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How would this initiative reduce unplanned water service interruptions (e.g., better than Victorian industry average per 1,000 connections)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise prevention/mitigation statement."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Service Reliability Alignment Agent. Extract a single statement showing how the initiative reduces unplanned interruptions through prediction, prevention, or faster restoration.\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Clear mechanism for reducing unplanned interruptions and improving reliability."
+        },
+        {
+          "fieldName": "zeroSewerSpills",
+          "displayName": "Explore Towards Zero Sewer Spills Alignment",
+          "description": "How does this initiative reduce the likelihood or impact of sewer spills?",
+          "extractionHint": "Return a single statement on prediction, prevention, or containment of spills.",
+          "required": false,
+          "dialogueAgent": {
+            "question": "In what way would this initiative reduce or prevent sewer spills (e.g., 10% improvement per 100 km of main)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on spill risk reduction/mitigation."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Sewer Spill Alignment Agent. Extract a single statement showing how the initiative predicts, prevents, or limits the impact of sewer spills (e.g., blockage risk, wet-weather inflow, rapid containment).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Explicit linkage to spill reduction via prediction, prevention, or containment."
+        },
+        {
+          "fieldName": "careForCountry",
+          "displayName": "Explore Care for Country Alignment",
+          "description": "How does this initiative demonstrate care for Country?",
+          "extractionHint": "Return a single statement reflecting cultural, environmental, and place-based care (e.g., co-design, protection of significant sites, ecosystem health).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How does this initiative demonstrate care for Country and respect for place (e.g., 100% Stretch RAP actions delivered, improved staff awareness/attitudes)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement demonstrating care for Country."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Care for Country Alignment Agent. Extract a single statement that reflects cultural respect, environmental stewardship, and place-based outcomes (e.g., Traditional Owner engagement, protection of significant sites, ecosystem benefits).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Statement shows culturally and environmentally respectful outcomes tied to place."
+        },
+        {
+          "fieldName": "zeroEmissions",
+          "displayName": "Explore Zero Emissions Alignment",
+          "description": "How does this initiative contribute to zero emissions?",
+          "extractionHint": "Return a single statement on emissions reduction/avoidance (e.g., energy optimisation, electrification readiness, process efficiency).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How would this initiative contribute to achieving zero emissions (e.g., 100% renewable electricity by 2025, zero Scope 1 by 2030 with sequestration, Scope 3 plan by 2030)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise emissions reduction contribution statement."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Emissions Alignment Agent. Extract a single statement showing how the initiative reduces or avoids emissions (e.g., energy optimisation, process control, electrification support, fugitive emissions reduction).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Clear link to emissions reduction or avoidance mechanism."
+        },
+        {
+          "fieldName": "zeroWaste",
+          "displayName": "Explore Zero Waste Alignment",
+          "description": "How does this initiative support zero waste?",
+          "extractionHint": "Return a single statement on waste elimination/reduction or beneficial reuse (e.g., biosolids, circular economy).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How would this initiative help move towards zero waste (e.g., 85% recoverable industrial waste reused/recycled, 100% biosolids to beneficial use, +1,000 ML/year recycled water to productive use)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on waste reduction or reuse."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Zero Waste Alignment Agent. Extract a single statement describing how the initiative reduces waste or enables beneficial reuse (e.g., process optimisation, circular economy opportunities).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Statement identifies waste reduction or reuse outcome and mechanism."
+        },
+        {
+          "fieldName": "healthyFlows",
+          "displayName": "Explore Healthy Flows in Rivers Alignment",
+          "description": "How does this initiative support healthy river flows and ecosystems?",
+          "extractionHint": "Return a single statement on environmental flow outcomes (e.g., abstraction timing, release optimisation, water quality).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How would this initiative support healthy river flows and ecosystems (e.g., 3,700 ML/year returned to Moorabool River by 2025, $7.3M invested in catchment and river health)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on supporting healthy flows/ecosystems."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Healthy Flows Alignment Agent. Extract a single statement on how the initiative supports environmental flows and river health (e.g., abstraction/release timing, water quality, ecosystem outcomes).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Clear environmental flow or ecosystem health linkage."
+        },
+        {
+          "fieldName": "affordableBills",
+          "displayName": "Explore Bills Affordable for All Alignment",
+          "description": "How does this initiative help keep bills affordable?",
+          "extractionHint": "Return a single statement on affordability (e.g., operating efficiencies, demand management, targeted support).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How does this initiative help keep bills affordable for customers (e.g., among the lowest residential bills, rises below inflation and interest rates, 96% pay/are supported before overdue)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on affordability impact."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Affordability Alignment Agent. Extract a single statement on how the initiative supports affordable bills (e.g., cost-to-serve reductions, demand shifts, hardship support targeting).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Statement shows a plausible pathway to lower or more stable customer bills."
+        },
+        {
+          "fieldName": "communityValuesUs",
+          "displayName": "Explore Community Values Us Alignment",
+          "description": "How does this initiative build community trust and value?",
+          "extractionHint": "Return a single statement on trust, transparency, engagement, or social value outcomes.",
+          "required": false,
+          "dialogueAgent": {
+            "question": "In what way would this initiative strengthen how the community values us (e.g., top 4 for value for money and trust, 90% agree we contribute positively, 90% stakeholders/industry customers trust us, workforce diversity aligns with community)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on community trust/value."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Community Trust Alignment Agent. Extract a single statement on how the initiative improves community trust and perceived value (e.g., transparency, responsiveness, co-design, measurable social value).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Clear link to stronger community trust or perceived value."
+        },
+        {
+          "fieldName": "financiallySustainable",
+          "displayName": "Explore Financially Sustainable Business Alignment",
+          "description": "How does this initiative support a financially sustainable business?",
+          "extractionHint": "Return a single statement on financial sustainability (e.g., whole-of-life cost, prioritisation, predictable outcomes).",
+          "required": false,
+          "dialogueAgent": {
+            "question": "How does this initiative help ensure the business is financially sustainable (e.g., opex/capex within ±10% of forecasts, ≥$5.8M efficiency savings, cash interest coverage ≥2.5x)?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Concise statement on financial sustainability contribution."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are the Financial Sustainability Alignment Agent. Extract a single statement showing how the initiative strengthens financial sustainability (e.g., investment prioritisation, whole-of-life cost reduction, outcome predictability).\n\nReturn strict JSON with fields: value (string), confidence (0–1), needsMoreInput (bool). No extra text.",
+            "confidence": { "min": 0.65 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Statement links the initiative to stronger long-term financial sustainability."
+        }
+      ]
     },
     {
-      "id": "t3",
-      "title": "Goals & Interests",
-      "systemPrompt": "Understand the user's career goals and professional interests. Be encouraging and supportive.",
-      "userIntro": "Finally, let's talk about your goals and interests.",
-      "fields": [
-        { "key": "careerGoals", "label": "Career goals", "required": true },
-        { "key": "interests", "label": "Professional interests", "required": true }
-      ],
-      "completionRule": "all_required_fields_present"
+      "stepId": "feasibility",
+      "displayName": "Activation",
+      "model": "gpt-4o-mini",
+      "topics": [
+        {
+          "fieldName": "ownership",
+          "displayName": "Assign Ownership",
+          "description": "Who will own and sponsor this initiative",
+          "extractionHint": "Extract a clear owner or sponsor with role and accountability.",
+          "required": false,
+          "dialogueAgent": {
+            "question": "Who will own and sponsor this AI initiative? Who has the authority to make decisions and fund this project?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Owner or sponsor, their role or position, and accountability."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are an experience Business Analyst who speaks Australian English. Your job is to identify who will own and sponsor this initiative. Focus on a specific person or role with authority to fund and decide, and make their accountability clear.\n\nMark complete when the specific owner or sponsor (person or role) is named and you have confirmed with the user that you have captured that correctly. Only after you have confirmed should you set needsMoreInput=false and give the just final response without any qualifiers like e.g., Does this summarise it for you:.... \n\nReturn strict JSON with fields: value (your response text), confidence (0–1), needsMoreInput (bool), missing (array). No extra text.",
+            "confidence": { "min": 0.8 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "A specific owner or sponsor is named with clear authority and accountability."
+        },
+        {
+          "fieldName": "keyStakeholders",
+          "displayName": "Identify Key Stakeholders",
+          "description": "Important stakeholders for this initiative",
+          "extractionHint": "Extract decision makers, resource providers, and impacted groups.",
+          "required": false,
+          "dialogueAgent": {
+            "question": "Who are the key stakeholders that need to be involved or supportive of this initiative? Think about decision makers, people who provide resources, and groups that will be impacted."
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Stakeholders, including decision makers, resource providers, and materially impacted groups."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are an experience Business Analyst who speaks Australian English. Your job is to get the user to list the stakeholders who must be involved or supportive. Make sure they include decision makers, resource owners, and materially impacted groups. Explain why they matter if stated.\n\n Only ask a single question at a time and keep your questions short and casual. \n\nMark complete when Important stakeholders have been identified and you have presented a summary back and the user has accepted that summary. Only after you have confirmed should you set needsMoreInput=false and give the just final response without any qualifiers like e.g., Does this summarise it for you:.... \n\nReturn strict JSON with fields: value (your response text), confidence (0–1), needsMoreInput (bool), missing (array). No extra text.",
+            "confidence": { "min": 0.6 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "Stakeholders include decision makers, resource providers, and impacted groups, with brief indication of their importance."
+        },
+        {
+          "fieldName": "rolloutPlan",
+          "displayName": "Develop Rollout Plan",
+          "description": "How this will be rolled out",
+          "extractionHint": "Extract rollout strategy, phases or pilot, and change or training elements.",
+          "required": false,
+          "dialogueAgent": {
+            "question": "What will we need to do to roll out your use case?"
+          },
+          "agent": {
+            "model": "gpt-4o-mini",
+            "contextWindow": 200,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "Rollout approach including pilot or phased plan, key milestones, and change or training considerations."
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "needsMoreInput": { "type": "boolean" },
+                "missing": { "type": "array", "items": { "type": "string" } }
+              },
+              "required": ["value", "confidence", "needsMoreInput"]
+            },
+            "prePrompt": "You are an experiences Business Analyst who speacks Australian English. Your job is to capture the strategy (pilot or phased), key milestones, and essential change or training activities needed to roll this use case out.\n\nMark complete when ALL are true \n\n Only ask a single question at a time and keep your questions short and casual \n\n Mark complete when you have established the rollout strategy, some key milestones, and change management activities needed, and you have presented a summary back and the user has accepted that summary. Only after you have confirmed should you set needsMoreInput=false and give the just final response without any qualifiers like e.g., Does this summarise it for you:....  \n\nReturn strict JSON: value (string), confidence (0–1), needsMoreInput (bool), missing (array of short phrases). No extra text.",
+            "confidence": { "min": 0.6 },
+            "retry": { "malformedJson": 3 }
+          },
+          "completionCriteria": "A credible rollout strategy is described with pilot or phases and change or training considerations."
+        }
+      ]
     }
   ],
-  "docx": {
-    "title": "Session Summary",
-    "fileName": "session-summary.docx"
+  "appBehaviour": {
+    "topicSession": {
+      "retry": {
+        "malformedJson": 3
+      },
+      "transcriptWindow": 200
+    }
   }
 }

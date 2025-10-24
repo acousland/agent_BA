@@ -4,7 +4,7 @@ import type { TopicState, AppConfig } from './types';
 interface TopicSidebarProps {
   config: AppConfig;
   state: TopicState | null;
-  onNavigate: (topicId: string) => void;
+  onNavigate: (stepId: string, topicId: string) => void;
   onDownload: () => void;
 }
 
@@ -34,33 +34,54 @@ export function TopicSidebar({ config, state, onNavigate, onDownload }: TopicSid
   return (
     <aside className="topic-sidebar glass">
       <div className="sidebar-header">
-        <h2>Topics</h2>
+        <h2>Progress</h2>
       </div>
 
-      <ul className="topics-list">
-        {config.topics.map((topic) => {
-          const topicData = state?.topics[topic.id];
-          const status = topicData?.status || 'NotStarted';
-          const isActive = state?.activeTopicId === topic.id;
-          const isComplete = status === 'Complete';
-          const isClickable = isComplete && !isActive;
+      <div className="steps-list">
+        {config.steps.map((step) => {
+          const stepData = state?.steps[step.stepId];
+          const stepStatus = stepData?.status || 'NotStarted';
 
           return (
-            <li
-              key={topic.id}
-              className={`topic-item ${isActive ? 'active' : ''} ${isClickable ? 'clickable' : ''}`}
-              onClick={() => isClickable && onNavigate(topic.id)}
-            >
-              <div className="topic-title">
-                {topic.title}
+            <div key={step.stepId} className="step-section">
+              <div className="step-header">
+                <h3>{step.displayName}</h3>
+                <span className={`status-badge ${getStatusBadgeClass(stepStatus)}`}>
+                  {getStatusLabel(stepStatus)}
+                </span>
               </div>
-              <span className={`status-badge ${getStatusBadgeClass(status)}`}>
-                {getStatusLabel(status)}
-              </span>
-            </li>
+
+              <ul className="topics-list">
+                {step.topics.map((topic) => {
+                  const topicData = stepData?.topics[topic.fieldName];
+                  const status = topicData?.status || 'NotStarted';
+                  const isActive =
+                    state?.activeStepId === step.stepId &&
+                    state?.activeTopicId === topic.fieldName;
+                  const isComplete = status === 'Complete';
+                  const isClickable = isComplete && !isActive;
+
+                  return (
+                    <li
+                      key={topic.fieldName}
+                      className={`topic-item ${isActive ? 'active' : ''} ${isClickable ? 'clickable' : ''}`}
+                      onClick={() => isClickable && onNavigate(step.stepId, topic.fieldName)}
+                      title={topic.description}
+                    >
+                      <div className="topic-title">
+                        {topic.displayName}
+                      </div>
+                      <span className={`status-badge ${getStatusBadgeClass(status)}`}>
+                        {getStatusLabel(status)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           );
         })}
-      </ul>
+      </div>
 
       <div className="download-section">
         <button
