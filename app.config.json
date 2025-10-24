@@ -1,0 +1,45 @@
+{
+  "appTitle": "Guided Topics Chat",
+  "greeting": "G'day! I'll guide you through a short set of topics to learn more about you.",
+  "topics": [
+    {
+      "id": "t1",
+      "title": "About You",
+      "systemPrompt": "Collect the user's full name, role/title, and city. Be friendly and conversational. Extract these fields from the conversation.",
+      "userIntro": "Let's start with some basics about you. What is your full name, role, and city?",
+      "fields": [
+        { "key": "fullName", "label": "Full name", "required": true },
+        { "key": "role", "label": "Role/Title", "required": true },
+        { "key": "city", "label": "City", "required": true }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t2",
+      "title": "Professional Background",
+      "systemPrompt": "Learn about the user's company, years of experience, and industry. Be conversational and ask follow-up questions if needed.",
+      "userIntro": "Great! Now tell me about your professional background.",
+      "fields": [
+        { "key": "company", "label": "Company", "required": true },
+        { "key": "yearsExperience", "label": "Years of experience", "required": true },
+        { "key": "industry", "label": "Industry", "required": false }
+      ],
+      "completionRule": "all_required_fields_present"
+    },
+    {
+      "id": "t3",
+      "title": "Goals & Interests",
+      "systemPrompt": "Understand the user's career goals and professional interests. Be encouraging and supportive.",
+      "userIntro": "Finally, let's talk about your goals and interests.",
+      "fields": [
+        { "key": "careerGoals", "label": "Career goals", "required": true },
+        { "key": "interests", "label": "Professional interests", "required": true }
+      ],
+      "completionRule": "all_required_fields_present"
+    }
+  ],
+  "docx": {
+    "title": "Session Summary",
+    "fileName": "session-summary.docx"
+  }
+}
